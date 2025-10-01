@@ -1,0 +1,9 @@
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/MallApplication.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/user/UserRepository.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/user/User.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/user/dto/LoginRequest.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/user/dto/UserUpdateRequest.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/config/CorsConfig.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/user/dto/UserCreateRequest.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/user/UserController.java
+/Users/sasitha/mall/backend/src/main/java/com/example/mall/config/DataSeeder.java
