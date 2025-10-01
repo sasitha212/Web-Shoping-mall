@@ -7,6 +7,7 @@ type Toast = { type: 'success' | 'error'; msg: string } | null;
 
 export default function Users(){
   const [users,setUsers]=useState<User[]>([]);
+  const [fetching,setFetching]=useState(false);
   const [email,setEmail]=useState('');
   const [name,setName]=useState('');
   const [phone,setPhone]=useState('');
@@ -20,6 +21,7 @@ export default function Users(){
   const [editRole,setEditRole]=useState('customer');
   const [editPassword,setEditPassword]=useState('');
   const [query,setQuery]=useState('');
+  const [searchInput,setSearchInput]=useState('');
   const [toast,setToast]=useState<Toast>(null);
 
   function showToast(type: 'success'|'error', msg: string){
@@ -29,7 +31,7 @@ export default function Users(){
 
   async function refresh(){
     setError(undefined);
-    try{ setUsers(await listUsers()); }catch(err:any){ setError(err.message);} 
+    try{ setFetching(true); setUsers(await listUsers()); }catch(err:any){ setError(err.message);} finally{ setFetching(false);} 
   }
 
   useEffect(()=>{ refresh(); },[]);
@@ -71,6 +73,17 @@ export default function Users(){
     return users.filter(u=>u.email.toLowerCase().includes(q) || u.name.toLowerCase().includes(q));
   },[users,query]);
 
+  const totals = useMemo(()=>{
+    const total = users.length;
+    const byRole = users.reduce((acc: Record<string, number>, u)=>{ const r=(u.role||'customer'); acc[r]=(acc[r]||0)+1; return acc;},{} as Record<string, number>);
+    return { total, admins: byRole['admin']||0, sellers: byRole['seller']||0, customers: byRole['customer']||0, delivery: byRole['delivery']||0 };
+  },[users]);
+
+  useEffect(()=>{
+    const t = setTimeout(()=>setQuery(searchInput), 250);
+    return ()=>clearTimeout(t);
+  },[searchInput]);
+
   async function removeUser(u: User){
     if(!confirm(`Delete ${u.email}?`)) return;
     try{ await deleteUser(u.id); showToast('success','User deleted'); await refresh(); }catch(err:any){ setError(err.message); showToast('error','Delete failed'); }
@@ -109,9 +122,36 @@ export default function Users(){
         </div>
       ) : null}
 
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Users</h1>
-        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by name or email" className="border rounded px-3 py-2" />
+      <div className="mb-6">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 text-white shadow">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold">Users</h1>
+              <p className="text-white/80 text-sm">Manage members, roles and access</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input value={searchInput} onChange={e=>setSearchInput(e.target.value)} placeholder="Search by name or email" className="rounded-lg px-3 py-2 text-gray-900 placeholder-gray-500" />
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="rounded-xl bg-white/10 backdrop-blur p-3">
+              <div className="text-xs uppercase tracking-wide text-white/70">Total</div>
+              <div className="text-lg font-semibold">{totals.total}</div>
+            </div>
+            <div className="rounded-xl bg-white/10 backdrop-blur p-3">
+              <div className="text-xs uppercase tracking-wide text-white/70">Admins</div>
+              <div className="text-lg font-semibold">{totals.admins}</div>
+            </div>
+            <div className="rounded-xl bg-white/10 backdrop-blur p-3">
+              <div className="text-xs uppercase tracking-wide text-white/70">Sellers</div>
+              <div className="text-lg font-semibold">{totals.sellers}</div>
+            </div>
+            <div className="rounded-xl bg-white/10 backdrop-blur p-3">
+              <div className="text-xs uppercase tracking-wide text-white/70">Customers</div>
+              <div className="text-lg font-semibold">{totals.customers}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {error ? <div className="text-red-600 text-sm mb-2">{error}</div> : null}
@@ -130,7 +170,7 @@ export default function Users(){
         <button disabled={loading} className="bg-blue-600 text-white rounded px-3 py-2">Add</button>
       </form>
 
-      <div className="bg-white rounded-xl border">
+      <div className="bg-white rounded-xl border overflow-hidden">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 text-gray-600">
             <tr>
@@ -141,7 +181,24 @@ export default function Users(){
             </tr>
           </thead>
           <tbody>
-            {filtered.map(u=> (
+            {fetching ? (
+              Array.from({length:5}).map((_,i)=> (
+                <tr key={i} className="border-t animate-pulse">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-gray-200" />
+                      <div>
+                        <div className="h-4 w-40 bg-gray-200 rounded" />
+                        <div className="mt-1 h-3 w-24 bg-gray-200 rounded" />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-3"><div className="h-5 w-16 bg-gray-200 rounded-full" /></td>
+                  <td className="px-4 py-3 text-right"><div className="h-8 w-28 bg-gray-200 rounded" /></td>
+                </tr>
+              ))
+            ) : filtered.map(u=> (
               <tr key={u.id} className="border-t">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
@@ -160,7 +217,14 @@ export default function Users(){
                 </td>
               </tr>
             ))}
-            {filtered.length===0 ? (<tr><td className="px-4 py-6 text-gray-500">No users</td></tr>): null}
+            {!fetching && filtered.length===0 ? (
+              <tr>
+                <td className="px-4 py-10 text-center text-gray-500" colSpan={4}>
+                  <div className="mx-auto mb-2 h-12 w-12 rounded-full bg-gray-100 grid place-items-center">👤</div>
+                  No users found
+                </td>
+              </tr>
+            ): null}
           </tbody>
         </table>
       </div>
