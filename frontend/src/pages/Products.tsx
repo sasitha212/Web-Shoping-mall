@@ -1,0 +1,122 @@
+import { useEffect, useMemo, useState } from 'react';
+import { listProducts, createProduct, updateProduct, deleteProduct } from '../lib/productApi';
+import { listShops } from '../lib/shopApi';
+
+type Product = { id: string; productName: string; description?: string; price: number; quantity: number; category?: string; shopId: string };
+
+type Shop = { id: string; shopName: string };
+
+export default function Products(){
+  const [products,setProducts]=useState<Product[]>([]);
+  const [shops,setShops]=useState<Shop[]>([]);
+  const [filterShop,setFilterShop]=useState('');
+  const [query,setQuery]=useState('');
+  const [form,setForm]=useState({ productName:'', description:'', price:0, quantity:0, category:'', shopId:'' });
+  const [editing,setEditing]=useState<Product|null>(null);
+  const [toast,setToast]=useState<{type:'success'|'error'; msg:string}|null>(null);
+  const show=(type:'success'|'error',msg:string)=>{ setToast({type,msg}); setTimeout(()=>setToast(null),2000); };
+
+  async function refresh(){ setShops(await listShops()); setProducts(await listProducts(filterShop||undefined)); }
+  useEffect(()=>{ refresh(); },[filterShop]);
+
+  const filtered = useMemo(()=>{ const q=query.toLowerCase(); return products.filter(p=> p.productName.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)); },[products,query]);
+
+  async function submit(e: React.FormEvent){
+    e.preventDefault(); if(!form.shopId) return show('error','Select shop');
+    try{ await createProduct({...form, price:+form.price, quantity:+form.quantity}); setForm({ productName:'', description:'', price:0, quantity:0, category:'', shopId:'' }); show('success','Product created'); await refresh(); }catch(e:any){ show('error', e.message); }
+  }
+
+  function openEdit(p: Product){ setEditing(p); window.scrollTo({top:0, behavior:'smooth'}); }
+
+  async function applyEdit(e: React.FormEvent){ e.preventDefault(); if(!editing) return; try{ await updateProduct(editing.id, editing); setEditing(null); show('success','Product updated'); await refresh(); }catch(e:any){ show('error', e.message); } }
+
+  async function remove(p: Product){ if(!confirm(`Delete ${p.productName}?`)) return; try{ await deleteProduct(p.id); show('success','Product deleted'); await refresh(); }catch(e:any){ show('error', e.message); } }
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      {editing ? (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-amber-900">Edit product</h2>
+            <button onClick={()=>setEditing(null)} className="text-sm text-amber-800 hover:underline">Close</button>
+          </div>
+          <form onSubmit={applyEdit} className="grid gap-3 md:grid-cols-6">
+            <input value={editing.productName} onChange={e=>setEditing({...editing!, productName:e.target.value})} placeholder="Product name" className="border rounded px-3 py-2" required />
+            <input value={editing.description||''} onChange={e=>setEditing({...editing!, description:e.target.value})} placeholder="Description" className="border rounded px-3 py-2" />
+            <input value={editing.price} onChange={e=>setEditing({...editing!, price:+e.target.value})} placeholder="Price" type="number" step="0.01" className="border rounded px-3 py-2" />
+            <input value={editing.quantity} onChange={e=>setEditing({...editing!, quantity:+e.target.value})} placeholder="Qty" type="number" className="border rounded px-3 py-2" />
+            <input value={editing.category||''} onChange={e=>setEditing({...editing!, category:e.target.value})} placeholder="Category" className="border rounded px-3 py-2" />
+            <select value={editing.shopId} onChange={e=>setEditing({...editing!, shopId:e.target.value})} className="border rounded px-3 py-2">
+              <option value="">Select shop</option>
+              {shops.map(s=> <option key={s.id} value={s.id}>{s.shopName}</option>)}
+            </select>
+            <div className="md:col-span-6 flex gap-2">
+              <button className="bg-amber-600 text-white rounded px-4 py-2">Save changes</button>
+              <button type="button" onClick={()=>setEditing(null)} className="rounded px-4 py-2 border">Cancel</button>
+            </div>
+          </form>
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h1 className="text-xl font-semibold">Products</h1>
+        <div className="flex gap-2">
+          <select value={filterShop} onChange={e=>setFilterShop(e.target.value)} className="border rounded px-3 py-2">
+            <option value="">All shops</option>
+            {shops.map(s=> <option key={s.id} value={s.id}>{s.shopName}</option>)}
+          </select>
+          <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by name/category" className="border rounded px-3 py-2" />
+        </div>
+      </div>
+
+      <form onSubmit={submit} className="bg-white rounded-xl border p-4 mb-6 grid gap-2 md:grid-cols-6">
+        <input value={form.productName} onChange={e=>setForm({...form, productName:e.target.value})} placeholder="Product name" className="border rounded px-3 py-2" required />
+        <input value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Description" className="border rounded px-3 py-2" />
+        <input value={form.price} onChange={e=>setForm({...form, price:+e.target.value})} placeholder="Price" type="number" step="0.01" className="border rounded px-3 py-2" />
+        <input value={form.quantity} onChange={e=>setForm({...form, quantity:+e.target.value})} placeholder="Qty" type="number" className="border rounded px-3 py-2" />
+        <input value={form.category} onChange={e=>setForm({...form, category:e.target.value})} placeholder="Category" className="border rounded px-3 py-2" />
+        <select value={form.shopId} onChange={e=>setForm({...form, shopId:e.target.value})} className="border rounded px-3 py-2">
+          <option value="">Select shop</option>
+          {shops.map(s=> <option key={s.id} value={s.id}>{s.shopName}</option>)}
+        </select>
+        <button className="bg-blue-600 text-white rounded px-3 py-2 md:col-span-6">Add product</button>
+      </form>
+
+      <div className="bg-white rounded-xl border">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-50 text-gray-600">
+            <tr>
+              <th className="text-left px-4 py-3">Product</th>
+              <th className="text-left px-4 py-3">Price</th>
+              <th className="text-left px-4 py-3">Qty</th>
+              <th className="text-left px-4 py-3">Category</th>
+              <th className="text-left px-4 py-3">Shop</th>
+              <th className="text-right px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(p=> (
+              <tr key={p.id} className="border-t">
+                <td className="px-4 py-3">
+                  <div className="font-medium">{p.productName}</div>
+                  <div className="text-gray-600 text-xs">{p.description}</div>
+                </td>
+                <td className="px-4 py-3">{p.price}</td>
+                <td className="px-4 py-3">{p.quantity}</td>
+                <td className="px-4 py-3">{p.category||'-'}</td>
+                <td className="px-4 py-3">{p.shopId}</td>
+                <td className="px-4 py-3 text-right">
+                  <button onClick={()=>openEdit(p)} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Edit</button>
+                  <button onClick={()=>remove(p)} className="px-3 py-1 rounded bg-red-600 text-white">Delete</button>
+                </td>
+              </tr>
+            ))}
+            {filtered.length===0 ? (<tr><td className="px-4 py-6 text-gray-500">No products</td></tr>): null}
+          </tbody>
+        </table>
+      </div>
+
+      {toast ? (<div className={"fixed bottom-4 right-4 rounded-lg px-4 py-2 shadow text-white "+(toast.type==='success'?'bg-emerald-600':'bg-red-600')}>{toast.msg}</div>) : null}
+    </div>
+);
+}
