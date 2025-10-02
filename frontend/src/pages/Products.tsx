@@ -14,10 +14,17 @@ export default function Products(){
   const [form,setForm]=useState({ productName:'', description:'', price:0, quantity:0, category:'', shopId:'' });
   const [editing,setEditing]=useState<Product|null>(null);
   const [toast,setToast]=useState<{type:'success'|'error'; msg:string}|null>(null);
+  const [viewing,setViewing]=useState<Product|null>(null);
   const show=(type:'success'|'error',msg:string)=>{ setToast({type,msg}); setTimeout(()=>setToast(null),2000); };
 
   async function refresh(){ setShops(await listShops()); setProducts(await listProducts(filterShop||undefined)); }
   useEffect(()=>{ refresh(); },[filterShop]);
+
+  useEffect(()=>{
+    function onKey(e: KeyboardEvent){ if(e.key==='Escape'){ setViewing(null);} }
+    if(viewing){ document.addEventListener('keydown', onKey); }
+    return ()=>document.removeEventListener('keydown', onKey);
+  },[viewing]);
 
   const filtered = useMemo(()=>{ const q=query.toLowerCase(); return products.filter(p=> p.productName.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)); },[products,query]);
   const shopById = useMemo(()=> shops.reduce((m,s)=>{ m[s.id]=s; return m; },{} as Record<string,Shop>),[shops]);
@@ -39,6 +46,43 @@ export default function Products(){
 
   return (
     <div className="max-w-6xl mx-auto">
+      {viewing ? (
+        <div className="fixed inset-0 z-40">
+          <div className="absolute inset-0 bg-black/40" onClick={()=>setViewing(null)} />
+          <div className="absolute inset-0 grid place-items-center p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border p-5 relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="text-lg font-semibold">{viewing.productName}</div>
+                  <div className="text-gray-600 text-sm">{viewing.description || '—'}</div>
+                </div>
+                <button onClick={()=>setViewing(null)} className="h-8 w-8 rounded-full hover:bg-gray-100 grid place-items-center" aria-label="Close">✕</button>
+              </div>
+              <div className="grid gap-3">
+                <div>
+                  <div className="text-xs text-gray-500">Price</div>
+                  <div className="font-medium">${viewing.price}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Quantity</div>
+                  <div className="font-medium">{viewing.quantity}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Category</div>
+                  <div className="font-medium">{viewing.category || '—'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Shop</div>
+                  <div className="font-medium">{shopLabel(viewing.shopId)}</div>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button onClick={()=>setViewing(null)} className="px-4 py-2 rounded border">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {editing ? (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -111,6 +155,7 @@ export default function Products(){
                 <td className="px-4 py-3">{p.category||'-'}</td>
                 <td className="px-4 py-3">{shopLabel(p.shopId)}</td>
                 <td className="px-4 py-3 text-right">
+                  <button onClick={()=>setViewing(p)} className="px-3 py-1 rounded border mr-2">View</button>
                   <button onClick={()=>openEdit(p)} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Edit</button>
                   <button onClick={()=>remove(p)} className="px-3 py-1 rounded bg-red-600 text-white">Delete</button>
                 </td>
