@@ -118,17 +118,37 @@ export default function Products(){
         </div>
       </div>
 
-      <form onSubmit={submit} className="bg-white rounded-xl border p-4 mb-6 grid gap-2 md:grid-cols-6">
-        <input value={form.productName} onChange={e=>setForm({...form, productName:e.target.value})} placeholder="Product name" className="border rounded px-3 py-2" required />
-        <input value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Description" className="border rounded px-3 py-2" />
-        <input value={form.price} onChange={e=>setForm({...form, price:+e.target.value})} placeholder="Price" type="number" step="0.01" className="border rounded px-3 py-2" />
-        <input value={form.quantity} onChange={e=>setForm({...form, quantity:+e.target.value})} placeholder="Qty" type="number" className="border rounded px-3 py-2" />
-        <input value={form.category} onChange={e=>setForm({...form, category:e.target.value})} placeholder="Category" className="border rounded px-3 py-2" />
-        <select value={form.shopId} onChange={e=>setForm({...form, shopId:e.target.value})} className="border rounded px-3 py-2">
-          <option value="">Select shop</option>
-          {shops.map(s=> <option key={s.id} value={s.id}>{s.shopName}</option>)}
-        </select>
-        <button className="bg-blue-600 text-white rounded px-3 py-2 md:col-span-6">Add product</button>
+      <form onSubmit={submit} className="bg-white rounded-xl border p-4 mb-6">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+            <input value={form.productName} onChange={e=>setForm({...form, productName:e.target.value})} placeholder="Enter product name" className="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <input value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Enter description" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+            <input value={form.price} onChange={e=>setForm({...form, price:+e.target.value})} placeholder="0.00" type="number" step="0.01" min="0" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+            <input value={form.quantity} onChange={e=>setForm({...form, quantity:+e.target.value})} placeholder="0" type="number" min="0" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <input value={form.category} onChange={e=>setForm({...form, category:e.target.value})} placeholder="Enter category" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Shop</label>
+            <select value={form.shopId} onChange={e=>setForm({...form, shopId:e.target.value})} className="w-full border rounded px-3 py-2">
+              <option value="">Select shop</option>
+              {shops.map(s=> <option key={s.id} value={s.id}>{s.shopName}</option>)}
+            </select>
+          </div>
+        </div>
+        <button className="mt-4 bg-blue-600 text-white rounded px-4 py-2 w-full">Add Product</button>
       </form>
 
       <div className="bg-white rounded-xl border">

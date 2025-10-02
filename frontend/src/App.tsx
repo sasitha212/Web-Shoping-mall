@@ -10,10 +10,18 @@ export default function App(){
   const [mobileOpen,setMobileOpen]=useState(false);
   const [avatarOpen,setAvatarOpen]=useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
-  const handleLogin=(u:any)=>setUser(u);
-  const handleLogout=()=>setUser(null);
+  const handleLogin=(u:any)=>{ setUser(u); localStorage.setItem('mall_user', JSON.stringify(u)); };
+  const handleLogout=()=>{ setUser(null); localStorage.removeItem('mall_user'); };
   const userInitial = useMemo(()=> (user?.name || user?.email || 'U').charAt(0).toUpperCase(),[user]);
   const closeMenus = ()=>{ setMobileOpen(false); setAvatarOpen(false); };
+
+  // Restore user from localStorage on app load
+  useEffect(()=>{
+    try{
+      const stored = localStorage.getItem('mall_user');
+      if(stored){ setUser(JSON.parse(stored)); }
+    }catch(e){ console.warn('Failed to restore user session:', e); }
+  },[]);
 
   useEffect(()=>{
     function handleClickOutside(e: MouseEvent){

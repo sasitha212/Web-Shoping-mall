@@ -111,16 +111,33 @@ export default function Shops(){
         <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search by name" className="border rounded px-3 py-2" />
       </div>
 
-      <form onSubmit={submit} className="bg-white rounded-xl border p-4 mb-6 grid gap-2 md:grid-cols-5">
-        <input value={form.shopName} onChange={e=>setForm({...form, shopName:e.target.value})} placeholder="Shop name" className="border rounded px-3 py-2" required />
-        <input value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Description" className="border rounded px-3 py-2" />
-        <select value={form.ownerUserId} onChange={e=>setForm({...form, ownerUserId:e.target.value})} className="border rounded px-3 py-2">
-          <option value="">Select owner</option>
-          {users.map(u=> <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
-        </select>
-        <input value={form.contactNumber} onChange={e=>setForm({...form, contactNumber:e.target.value})} placeholder="Contact" className="border rounded px-3 py-2" />
-        <input value={form.address} onChange={e=>setForm({...form, address:e.target.value})} placeholder="Address" className="border rounded px-3 py-2" />
-        <button className="bg-blue-600 text-white rounded px-3 py-2 md:col-span-5">Add shop</button>
+      <form onSubmit={submit} className="bg-white rounded-xl border p-4 mb-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Shop Name</label>
+            <input value={form.shopName} onChange={e=>setForm({...form, shopName:e.target.value})} placeholder="Enter shop name" className="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <input value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Enter description" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
+            <select value={form.ownerUserId} onChange={e=>setForm({...form, ownerUserId:e.target.value})} className="w-full border rounded px-3 py-2">
+              <option value="">Select owner</option>
+              {users.map(u=> <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+            <input value={form.contactNumber} onChange={e=>setForm({...form, contactNumber:e.target.value})} placeholder="Enter contact number" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <input value={form.address} onChange={e=>setForm({...form, address:e.target.value})} placeholder="Enter address" className="w-full border rounded px-3 py-2" />
+          </div>
+        </div>
+        <button className="mt-4 bg-blue-600 text-white rounded px-4 py-2 w-full">Add Shop</button>
       </form>
 
       <div className="bg-white rounded-xl border">

@@ -195,18 +195,35 @@ export default function Users(){
 
       {error ? <div className="text-red-600 text-sm mb-2">{error}</div> : null}
 
-      <form onSubmit={addUser} className="bg-white rounded-xl border p-4 mb-6 grid gap-2 md:grid-cols-6">
-        <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email" className="border rounded px-3 py-2" required />
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name" className="border rounded px-3 py-2" required />
-        <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Phone" className="border rounded px-3 py-2" />
-        <select value={role} onChange={e=>setRole(e.target.value)} className="border rounded px-3 py-2">
-          <option value="customer">Customer</option>
-          <option value="admin">Admin</option>
-          <option value="seller">Seller</option>
-          <option value="delivery">Delivery staff</option>
-        </select>
-        <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password" className="border rounded px-3 py-2" required />
-        <button disabled={loading} className="bg-blue-600 text-white rounded px-3 py-2">Add</button>
+      <form onSubmit={addUser} className="bg-white rounded-xl border p-4 mb-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Enter email address" type="email" className="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Enter full name" className="w-full border rounded px-3 py-2" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Enter phone number" className="w-full border rounded px-3 py-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <select value={role} onChange={e=>setRole(e.target.value)} className="w-full border rounded px-3 py-2">
+              <option value="customer">Customer</option>
+              <option value="admin">Admin</option>
+              <option value="seller">Seller</option>
+              <option value="delivery">Delivery staff</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter password" type="password" className="w-full border rounded px-3 py-2" required />
+          </div>
+        </div>
+        <button disabled={loading} className="mt-4 bg-blue-600 text-white rounded px-4 py-2 w-full">Add User</button>
       </form>
 
       <div className="bg-white rounded-xl border overflow-hidden">
