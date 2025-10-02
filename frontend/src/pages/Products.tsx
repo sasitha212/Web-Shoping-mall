@@ -20,6 +20,11 @@ export default function Products(){
   useEffect(()=>{ refresh(); },[filterShop]);
 
   const filtered = useMemo(()=>{ const q=query.toLowerCase(); return products.filter(p=> p.productName.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)); },[products,query]);
+  const shopById = useMemo(()=> shops.reduce((m,s)=>{ m[s.id]=s; return m; },{} as Record<string,Shop>),[shops]);
+  const shopLabel = (shopId: string)=>{
+    const s = shopById[shopId];
+    return s ? s.shopName : shopId;
+  };
 
   async function submit(e: React.FormEvent){
     e.preventDefault(); if(!form.shopId) return show('error','Select shop');
@@ -104,7 +109,7 @@ export default function Products(){
                 <td className="px-4 py-3">{p.price}</td>
                 <td className="px-4 py-3">{p.quantity}</td>
                 <td className="px-4 py-3">{p.category||'-'}</td>
-                <td className="px-4 py-3">{p.shopId}</td>
+                <td className="px-4 py-3">{shopLabel(p.shopId)}</td>
                 <td className="px-4 py-3 text-right">
                   <button onClick={()=>openEdit(p)} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Edit</button>
                   <button onClick={()=>remove(p)} className="px-3 py-1 rounded bg-red-600 text-white">Delete</button>
