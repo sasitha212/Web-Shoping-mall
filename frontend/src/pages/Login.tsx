@@ -37,7 +37,7 @@ export default function Login({ onLogin }: Props){
           <form onSubmit={submit} className="space-y-3">
             <div>
               <label className="text-sm text-gray-700">Email</label>
-              <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" type="email" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/60" required />
+              <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="@example.com" type="email" className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/60" required />
             </div>
             <div>
               <label className="text-sm text-gray-700">Password</label>

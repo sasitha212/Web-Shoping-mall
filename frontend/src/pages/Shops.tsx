@@ -19,6 +19,12 @@ export default function Shops(){
   useEffect(()=>{ refresh(); },[]);
 
   const filtered = useMemo(()=>{ const q=query.toLowerCase(); return shops.filter(s=> s.shopName.toLowerCase().includes(q)); },[shops,query]);
+  const userById = useMemo(()=> users.reduce((m,u)=>{ m[u.id]=u; return m; },{} as Record<string,User>),[users]);
+  const ownerLabel = (ownerUserId: string)=>{
+    const u = userById[ownerUserId];
+    if(!u) return ownerUserId;
+    return `${u.name} (${u.email})`;
+  };
 
   async function submit(e: React.FormEvent){
      e.preventDefault();
@@ -94,7 +100,7 @@ export default function Shops(){
                   <div className="font-medium">{s.shopName}</div>
                   <div className="text-gray-600 text-xs">{s.description}</div>
                 </td>
-                <td className="px-4 py-3">{s.ownerUserId}</td>
+                <td className="px-4 py-3">{ownerLabel(s.ownerUserId)}</td>
                 <td className="px-4 py-3">{s.contactNumber||'-'}</td>
                 <td className="px-4 py-3 text-right">
                   <button onClick={()=>openEdit(s)} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Edit</button>

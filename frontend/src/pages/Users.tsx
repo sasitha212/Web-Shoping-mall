@@ -23,6 +23,7 @@ export default function Users(){
   const [query,setQuery]=useState('');
   const [searchInput,setSearchInput]=useState('');
   const [toast,setToast]=useState<Toast>(null);
+  const [viewing,setViewing]=useState<User|null>(null);
 
   function showToast(type: 'success'|'error', msg: string){
     setToast({ type, msg });
@@ -35,6 +36,12 @@ export default function Users(){
   }
 
   useEffect(()=>{ refresh(); },[]);
+
+  useEffect(()=>{
+    function onKey(e: KeyboardEvent){ if(e.key==='Escape'){ setViewing(null);} }
+    if(viewing){ document.addEventListener('keydown', onKey); }
+    return ()=>document.removeEventListener('keydown', onKey);
+  },[viewing]);
 
   async function addUser(e: React.FormEvent){
     e.preventDefault();
@@ -97,6 +104,38 @@ export default function Users(){
 
   return (
     <div className="max-w-6xl mx-auto">
+      {viewing ? (
+        <div className="fixed inset-0 z-40">
+          <div className="absolute inset-0 bg-black/40" onClick={()=>setViewing(null)} />
+          <div className="absolute inset-0 grid place-items-center p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl border p-5 relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-indigo-600 text-white grid place-items-center font-semibold">{(viewing.name||viewing.email).charAt(0).toUpperCase()}</div>
+                  <div>
+                    <div className="text-lg font-semibold">{viewing.name || '—'}</div>
+                    <div className="text-gray-600 text-sm">{viewing.email}</div>
+                  </div>
+                </div>
+                <button onClick={()=>setViewing(null)} className="h-8 w-8 rounded-full hover:bg-gray-100 grid place-items-center" aria-label="Close">✕</button>
+              </div>
+              <div className="grid gap-3">
+                <div>
+                  <div className="text-xs text-gray-500">Phone</div>
+                  <div className="font-medium">{viewing.phone || '-'}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500">Role</div>
+                  <div>{roleBadge(viewing.role)}</div>
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button onClick={()=>setViewing(null)} className="px-4 py-2 rounded border">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {editing ? (
         <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -212,6 +251,7 @@ export default function Users(){
                 <td className="px-4 py-3">{u.phone || '-'}</td>
                 <td className="px-4 py-3">{roleBadge(u.role)}</td>
                 <td className="px-4 py-3 text-right">
+                  <button onClick={()=>setViewing(u)} className="px-3 py-1 rounded border mr-2">View</button>
                   <button onClick={()=>openEditor(u)} className="px-3 py-1 rounded bg-emerald-600 text-white mr-2">Edit</button>
                   <button onClick={()=>removeUser(u)} className="px-3 py-1 rounded bg-red-600 text-white">Delete</button>
                 </td>
