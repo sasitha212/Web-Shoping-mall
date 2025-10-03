@@ -33,16 +33,34 @@ export default function Shops(){
     return `${u.name} (${u.email})`;
   };
 
+  function validateForm(){
+    if(!form.shopName.trim()) return 'Shop name is required';
+    if(!form.ownerUserId) return 'Please select an owner';
+    if(form.contactNumber && !/^\d{10}$/.test(form.contactNumber)) return 'Contact number must be exactly 10 digits';
+    return null;
+  }
+
   async function submit(e: React.FormEvent){
      e.preventDefault();
-     if(!form.ownerUserId) return show('error','Select owner');
+     const error = validateForm();
+     if(error) return show('error', error);
      try{ await createShop(form); setForm({ shopName:'', description:'', ownerUserId:'', contactNumber:'', address:'' }); show('success','Shop created'); await refresh(); }catch(e:any){ show('error', e.message); }
   }
 
   function openEdit(s: Shop){ setEditing(s); window.scrollTo({top:0, behavior:'smooth'}); }
 
+  function validateEditForm(){
+    if(!editing) return null;
+    if(!editing.shopName.trim()) return 'Shop name is required';
+    if(!editing.ownerUserId) return 'Please select an owner';
+    if(editing.contactNumber && !/^\d{10}$/.test(editing.contactNumber)) return 'Contact number must be exactly 10 digits';
+    return null;
+  }
+
   async function applyEdit(e: React.FormEvent){
      e.preventDefault(); if(!editing) return; 
+     const error = validateEditForm();
+     if(error) return show('error', error);
      try{ await updateShop(editing.id, editing); setEditing(null); show('success','Shop updated'); await refresh(); }catch(e:any){ show('error', e.message); }
   }
 
@@ -96,7 +114,17 @@ export default function Shops(){
               <option value="">Select owner</option>
               {users.map(u=> <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
             </select>
-            <input value={editing.contactNumber||''} onChange={e=>setEditing({...editing!, contactNumber:e.target.value})} placeholder="Contact" className="border rounded px-3 py-2" />
+            <input 
+              value={editing.contactNumber||''} 
+              onChange={e=>{
+                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                setEditing({...editing!, contactNumber:value});
+              }} 
+              placeholder="10-digit phone number" 
+              className="border rounded px-3 py-2" 
+              maxLength={10}
+              pattern="[0-9]{10}"
+            />
             <input value={editing.address||''} onChange={e=>setEditing({...editing!, address:e.target.value})} placeholder="Address" className="border rounded px-3 py-2" />
             <div className="md:col-span-5 flex gap-2">
               <button className="bg-indigo-600 text-white rounded px-4 py-2">Save changes</button>
@@ -114,7 +142,7 @@ export default function Shops(){
       <form onSubmit={submit} className="bg-white rounded-xl border p-4 mb-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Shop Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Shop Name *</label>
             <input value={form.shopName} onChange={e=>setForm({...form, shopName:e.target.value})} placeholder="Enter shop name" className="w-full border rounded px-3 py-2" required />
           </div>
           <div>
@@ -122,15 +150,25 @@ export default function Shops(){
             <input value={form.description} onChange={e=>setForm({...form, description:e.target.value})} placeholder="Enter description" className="w-full border rounded px-3 py-2" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Owner</label>
-            <select value={form.ownerUserId} onChange={e=>setForm({...form, ownerUserId:e.target.value})} className="w-full border rounded px-3 py-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Owner *</label>
+            <select value={form.ownerUserId} onChange={e=>setForm({...form, ownerUserId:e.target.value})} className="w-full border rounded px-3 py-2" required>
               <option value="">Select owner</option>
               {users.map(u=> <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-            <input value={form.contactNumber} onChange={e=>setForm({...form, contactNumber:e.target.value})} placeholder="Enter contact number" className="w-full border rounded px-3 py-2" />
+            <input 
+              value={form.contactNumber} 
+              onChange={e=>{
+                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                setForm({...form, contactNumber:value});
+              }} 
+              placeholder="Enter 10-digit phone number" 
+              className="w-full border rounded px-3 py-2" 
+              maxLength={10}
+              pattern="[0-9]{10}"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
