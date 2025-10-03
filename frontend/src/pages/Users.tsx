@@ -61,7 +61,8 @@ export default function Users(){
     if(!name.trim()) return 'Name is required';
     if(/[0-9]/.test(name)) return 'Name cannot contain numbers';
     if(!password.trim()) return 'Password is required';
-    if(phone && !/^\d{10}$/.test(phone)) return 'Phone number must be exactly 10 digits';
+    if(!phone.trim()) return 'Phone number is required';
+    if(!/^\d{10}$/.test(phone)) return 'Phone number must be exactly 10 digits';
     return null;
   }
 
@@ -635,7 +636,7 @@ export default function Users(){
           </div>
             
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700">Phone Number *</label>
               <div className="relative">
                 <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -650,6 +651,7 @@ export default function Users(){
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
               maxLength={10}
               pattern="[0-9]{10}"
+              required
             />
           </div>
             </div>
